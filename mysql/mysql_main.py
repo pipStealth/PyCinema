@@ -1,6 +1,6 @@
 import pymysql
 import pymysql.cursors
-from mysql_config import host, user, password, db_name
+from .mysql_config import host, user, password, db_name
 
 def execute_db(task):
     try:
@@ -9,7 +9,7 @@ def execute_db(task):
             port=3306,
             user=user,
             password=password,
-            database="root",
+            database=db_name,
             cursorclass=pymysql.cursors.DictCursor
         )
         print("Connected to the database successfully...")
