@@ -2,6 +2,8 @@
 venv/
 __init__.py
 users.json
+add_film.log
+mysql_test.py
 
 mysql_config.py
 aiogram_config.py
