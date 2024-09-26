@@ -7,3 +7,5 @@ mysql_test.py
 
 mysql_config.py
 aiogram_config.py
+chat.log
+log.log

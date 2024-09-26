@@ -35,7 +35,7 @@ from mysql.mysql_command import get_poster_by_code, get_all_codes, get_last_code
 ##########################################################################
 # REGISTRATION AND INITIALIZATION BOT
 
-logging.basicConfig(level=logging.INFO) #  Setting the level of logs to INFO
+logging.basicConfig(filename="log.log", level=logging.INFO) #  Setting the level of logs to INFO
 bot = Bot(token) #  Creating bot instance with token
 dp = Dispatcher() # Create dispatcher type
 
@@ -90,7 +90,8 @@ def ban_user_by_id(user_id, file_path="users.json"):
     try:
         with open(file_path, 'r') as f:
             users = json.load(f)
-        users["USER"][f"user{user_id}"]["ban"] = True
+        with open(file_path, "a") as _:
+            users["USER"][f"user{user_id}"]["ban"] = True
         return True
     except (FileNotFoundError, KeyError):
         return f"User {user_id} not found."
@@ -99,7 +100,8 @@ def unban_user_by_id(user_id, file_path="users.json"):
     try:
         with open(file_path, 'r') as f:
             users = json.load(f)
-        users["USER"][f"user{user_id}"]["ban"] = False
+        with open(file_path, "a") as _:
+            users["USER"][f"user{user_id}"]["ban"] = False
         return True
     except (FileNotFoundError, KeyError):
         return f"User {user_id} not found."
@@ -108,6 +110,7 @@ def read_image(file_path):
     sys.path.append('D:/Kinopoisk project/bot app')
     with open(file_path, 'rb') as file:
         return file.read()
+    
 
 ##########################################################################
 # STATES
@@ -304,7 +307,10 @@ async def ban(message: types.Message, state: FSMContext):
 @dp.message(F.text, StateFilter(Admins.ban))
 async def ban(message: types.Message, state: FSMContext):
     if message.text != admin_id:
-        await message.reply("😜 Done!") if ban_user_by_id(message.text) else await message.reply("😡 User not found!")
+        if ban_user_by_id(message.text):
+            await message.reply("😜 Done!")
+        else:
+            await message.reply("😡 User not found!")
     else:
         await message.reply("😡 What do you doing!?")
     await state.set_state(None)
@@ -324,7 +330,10 @@ async def ban(message: types.Message, state: FSMContext):
 @dp.message(F.text, StateFilter(Admins.unban))
 async def ban(message: types.Message, state: FSMContext):
     if message.text != admin_id:
-        await message.reply("😜 Done!") if unban_user_by_id(message.text) else await message.reply("😡 User not found!")
+        if unban_user_by_id(message.text):
+            await message.reply("😜 Done!") 
+        else:
+            await message.reply("😡 User not found!")
     else:
         await message.reply("😡 What do you doing!?")
     await state.set_state(None)
