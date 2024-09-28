@@ -35,7 +35,7 @@ from mysql.mysql_command import get_poster_by_code, get_all_codes, get_last_code
 ##########################################################################
 # REGISTRATION AND INITIALIZATION BOT
 
-logging.basicConfig(filename="log.log", level=logging.INFO) #  Setting the level of logs to INFO
+logging.basicConfig(level=logging.INFO) #  Setting the level of logs to INFO
 bot = Bot(token) #  Creating bot instance with token
 dp = Dispatcher() # Create dispatcher type
 

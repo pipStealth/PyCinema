@@ -16,7 +16,7 @@ def add_db(code, headline, description, photo):
         with conn.cursor() as cur:
             cur.execute("INSERT INTO kinopoisk (code, headline, description, photo) VALUES (%s, %s, %s, %s)", (code, headline, description, photo))  # Извлекаем запрос и параметры из кортежа
         conn.commit()
-        return True  # Возвращаем True, если все прошло успешно
+        return True 
     except Exception as e:
         print("Error in connection...")
         print(e)

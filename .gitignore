@@ -5,6 +5,7 @@ users.json
 add_film.log
 mysql_test.py
 
+flask_config.py
 mysql_config.py
 aiogram_config.py
 chat.log

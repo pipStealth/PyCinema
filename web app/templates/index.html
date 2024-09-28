@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PyCinema - Your Film Library</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <style>
+        .movie-img {
+            width: 305px;
+            height: 250px;
+            object-fit: cover;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">PyCinema</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Search</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Reviews</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <header class="bg-primary text-white text-center py-5">
+        <div class="container">
+            <h1>Welcome to PyCinema</h1>
+            <p>Your ultimate film library and review platform</p>
+            <form class="row g-3 mt-3" id="searchForm" method="POST">
+                <div class="col-md-8 offset-md-2">
+                    <input type="text" class="form-control" id="searchQuery" name="query" placeholder="Search for movies by code...">
+                </div>
+                <div class="col-md-2 text-md-end">
+                    <button type="submit" class="btn btn-warning">Search</button>
+                </div>
+            </form>
+        </div>
+    </header>
+
+    <main class="container mt-5">
+        <h2 class="text-center mb-4">Movies</h2>
+        <div id="movieList" class="row">
+            <!-- Movie cards will be injected here via JS -->
+        </div>
+    </main>
+
+    <footer class="bg-dark text-white text-center py-4 mt-5">
+        <p>&copy; 2024 PyCinema. All rights reserved.</p>
+    </footer>
+
+    <script>
+        $(document).ready(function() {
+            // Movies array from the Flask app
+            const movies = {{ movies | tojson | safe }};
+        
+            // Function to inject movies into the DOM
+            function displayMovies(movieList) {
+                const movieContainer = $('#movieList');
+                movieContainer.empty();  // Clear existing content
+                movieList.forEach(movie => {
+                    // Limit headline to 300 characters
+                    let description = movie.description.length > 300 ? movie.description.substring(0, 300) + '...' : movie.description;
+        
+                    const movieCard = `
+                    <div class="col-md-3">
+                        <div class="card mb-4 shadow-sm">
+                            <img src="data:image/jpeg;base64,${movie.encoded_image}" class="card-img-top movie-img" alt="${movie.headline}">
+                            <div class="card-body">
+                                <h5 class="card-title">${movie.headline} (${movie.code})</h5>
+                                <p class="card-text">${description}</p>
+                                <p class="card-text"></p>
+                                <p class="card-text">${movie.ganere} ${movie.rating}</p>
+                            </div>
+                        </div>
+                    </div>`;
+                    movieContainer.append(movieCard);
+                });
+            }
+        
+            // Load movies initially
+            displayMovies(movies);
+        
+            // Handle search form submission
+            $('#searchForm').submit(function(event) {
+                event.preventDefault();
+                const query = $('#searchQuery').val().toLowerCase();
+        
+                // AJAX POST request to Flask
+                $.ajax({
+                    type: 'POST',
+                    url: '/search',
+                    data: { query: query },
+                    success: function(response) {
+                        console.log('Response:', response);  // Выводим ответ в консоль
+                        if (response.movies && response.movies.length > 0) {
+                            displayMovies(response.movies); // Display filtered movies
+                        } else {
+                            $('#movieList').empty(); // Clear existing movies
+                            $('#movieList').append('<p class="text-center">No movies found</p>'); // Message if no movies found
+                        }
+                    },
+                    error: function(jqXHR, textStatus, errorThrown) {
+                        console.log('Error details:', textStatus, errorThrown);  // Выводим детали ошибки в консоль
+                        alert('Error occurred while searching');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
