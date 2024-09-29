@@ -9,5 +9,5 @@ def get_all_codes():
 def get_last_code():
     return "SELECT code FROM kinopoisk ORDER BY id DESC LIMIT 1;"
 
-def add_film(code, headline, description, photo):
-    return "INSERT INTO kinopoisk (code, headline, description, photo) VALUES (%s, %s, %s, %s)", (code, headline, description, photo)
+def get_preview():
+    return "SELECT * FROM kinopoisk WHERE code BETWEEN 100 AND 107;"

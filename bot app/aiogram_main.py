@@ -111,6 +111,7 @@ def read_image(file_path):
     with open(file_path, 'rb') as file:
         return file.read()
     
+sys.path.append('D:/Kinopoisk project/bot app')
 
 ##########################################################################
 # STATES
@@ -191,6 +192,8 @@ async def films(message: types.Message, state: FSMContext):
 async def take_film_code(message: types.Message, state: FSMContext):
     answer = take_db(get_poster_by_code(message.text), 0)   
     if answer.get("photo"):
+        sys.path.append('D:/Kinopoisk project')
+
         random_name = ''.join([str(random.randint(0, 9)) for _ in range(24)])
         image = Image.open(io.BytesIO(answer["photo"]))
         image.save(f"{random_name}.png")
@@ -374,6 +377,8 @@ async def handle_photo(message: types.Message, state: FSMContext):
 
 @dp.message(StateFilter(Admins.add_film_description))
 async def handle_photo(message: types.Message, state: FSMContext):
+    sys.path.append('D:/Kinopoisk project')
+
     with open('add_film.log', 'a') as log_file:
         log_file.write(f'{message.text}\n')
     await message.reply("😎 Cool! Now I add it to database!")
@@ -399,7 +404,9 @@ async def handle_photo(message: types.Message, state: FSMContext):
     else:
         await message.reply("📛 Error!")
 
-    os.remove(f"{poster}.png")
+    os.remove(f"{poster}")
+
+    await state.set_state(None)
 
 async def main():
     await dp.start_polling(bot)

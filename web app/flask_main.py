@@ -5,7 +5,7 @@ from flask_config import SECRET_KEY, API_KEY_OMBDB, DEBUG_STATUS
 import base64
 sys.path.append('D:/Kinopoisk project')
 from mysql.mysql_main import add_db, take_db 
-from mysql.mysql_command import get_poster_by_code, get_all_codes, get_last_code
+from mysql.mysql_command import get_poster_by_code, get_all_codes, get_last_code, get_preview
 
 # =============================================================================
 # Configuration
@@ -26,60 +26,31 @@ def get_movie_info_omdb(title, api_key=API_KEY_OMBDB):
                 'rating': data.get('imdbRating')
             }
         else:
-            return f"Movie not found: {data['Error']}"
+            return False
     else:
-        return f"Error: {response.status_code}"
+        return False
 
-# def movies():
-#     list = []
-#     for i in range(100, take_db(get_last_code(), 0)["code"]+1):
-#         image_data = take_db(get_poster_by_code(i), 0)["photo"]
-#         list.append(
-#             {"code": take_db(get_poster_by_code(i), 0)["code"],
-#             "headline": take_db(get_poster_by_code(i), 0)["headline"],
-#             "description": take_db(get_poster_by_code(i), 0)["description"],
-#             "encoded_image": base64.b64encode(image_data).decode('utf-8'),
-#             "rating": get_movie_info_omdb(take_db(get_poster_by_code(i), 0)["headline"])["rating"],
-#             "ganere": get_movie_info_omdb(take_db(get_poster_by_code(i), 0)["headline"])["genre"]}
-#             )
-#     return list
-    
 
+# =============================================================================
+# Routers
 # =============================================================================
 
 @app.route('/')
 def home():
-    movies = []
-    for i in range(100, take_db(get_last_code(), 0)["code"]+1):
-        image_data = take_db(get_poster_by_code(i), 0)["photo"]
-        movies.append(
-            {"code": take_db(get_poster_by_code(i), 0)["code"],
-            "headline": take_db(get_poster_by_code(i), 0)["headline"],
-            "description": take_db(get_poster_by_code(i), 0)["description"],
-            "encoded_image": base64.b64encode(image_data).decode('utf-8'),
-}
-            )
-        
+    movies = take_db(get_preview(), 1)
+    for i in range(0, 8):
+        movies[i]["photo"] = base64.b64encode(movies[i]["photo"]).decode('utf-8')
     return render_template("index.html", movies=movies)
 
 @app.route('/search', methods=['POST'])
 def search():
-    movies = []
-    for i in range(100, take_db(get_last_code(), 0)["code"]+1):
-        image_data = take_db(get_poster_by_code(i), 0)["photo"]
-        movies.append(
-            {"code": take_db(get_poster_by_code(i), 0)["code"],
-            "headline": take_db(get_poster_by_code(i), 0)["headline"],
-            "description": take_db(get_poster_by_code(i), 0)["description"],
-            "encoded_image": base64.b64encode(image_data).decode('utf-8'),
-}
-            )
     query = request.form.get('query', '').lower()
     try:
-        filtered_movies = [movie for movie in movies if query in str(movie['code']).lower()]
-        return jsonify({"movies": filtered_movies})
+        movies = take_db(get_poster_by_code(query), 1)
+        movies[0]["photo"] = base64.b64encode(movies[0]["photo"]).decode('utf-8')
+        return jsonify({"movies": movies})
     except Exception as e:
-        print(f"Error: {e}")  # Вывод ошибки в консоль
+        print(f"Error: {e}")
         return jsonify({"error": "An error occurred during search."}), 500
 
 if __name__ == "__main__":
