@@ -37,15 +37,24 @@ def get_movie_info_omdb(title, api_key=API_KEY_OMBDB):
 
 @app.route('/')
 def home():
-    movies = take_db(get_preview(), 1)
-    for i in range(0, 8):
-        movies[i]["photo"] = base64.b64encode(movies[i]["photo"]).decode('utf-8')
-    return render_template("index.html", movies=movies)
+    try:
+        movies = take_db(get_preview(), 1); 
+        for i in range(0, 8):
+            movies[i]["photo"] = base64.b64encode(movies[i]["photo"]).decode('utf-8')
+        return render_template("index.html", movies=movies)
+    except Exception as e:
+        print(f"Some error: {e}")
+        abort(501)
 
 @app.route('/search', methods=['POST'])
 def search():
     query = request.form.get('query', '').lower()
     try:
+        if (not query) or (len(query) <= 2):
+            movies = take_db(get_preview(), 1)
+            for i in range(0, 8):
+                movies[i]["photo"] = base64.b64encode(movies[i]["photo"]).decode('utf-8')
+            return jsonify({"movies": movies})
         movies = take_db(get_poster_by_code(query), 1)
         movies[0]["photo"] = base64.b64encode(movies[0]["photo"]).decode('utf-8')
         return jsonify({"movies": movies})
